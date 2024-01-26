@@ -1,0 +1,144 @@
+/* ********* root ********* */
+:root {
+  --font: sans-serif;
+}
+
+/* ********* Reset ********* */
+html {
+  box-sizing: border-box;
+  font-family: var(--font);
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--text-color);
+}
+
+a {
+  color: var(--link-color);
+  transition: all 0.5s ease-out;
+}
+
+a:hover {
+  opacity: 0.75;
+}
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+h5 {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+h6 {
+  margin: 0;
+  font-size: 0.7rem;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+p {
+  line-height: 1.6;
+}
+/* ********* Components ********* */
+
+/* messages */
+.messages-container {
+  display: flex;
+}
+.messages-content {
+  width: 70%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.messages {
+  height: calc(100vh - 2rem);
+  overflow-y: scroll;
+  background-color: rgba(221, 221, 221, 0.425);
+  padding: 0.5rem 0.5rem 0 0.5rem;
+}
+.messages ul {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.messages li {
+  width: fit-content;
+  padding: 0.5rem;
+  margin: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  list-style-type: none;
+  border: 2px solid #b2aeb2;
+  border-radius: 0.5rem;
+}
+.messages li p {
+  margin: 0;
+}
+/* Chat */
+.chat-container {
+  width: 100%;
+}
+.chat-container form {
+  width: inherit;
+  display: flex;
+  gap: 0.5rem;
+  padding: 8px;
+}
+.chat-container form > input {
+  padding: 0;
+  margin: 0;
+}
+.chat-container form > input[type="text"] {
+  width: 80%;
+  height: 2rem;
+  border-radius: 0.5rem;
+}
+
+.chat-container form > input[type="submit"] {
+  width: 20%;
+  height: 2rem;
+}
+
+/* ********* Utilities ********* */
+.align-self-right {
+  align-self: end;
+}
+
+.slef-message {
+  background-color: #229ed9;
+  color: white;
+  border: none;
+}
+/* ********* Site Styles ********* */
