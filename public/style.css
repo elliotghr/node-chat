@@ -131,6 +131,30 @@ p {
   height: 2rem;
 }
 
+/* users-connected */
+
+.users-connected {
+  width: 30%;
+  height: auto;
+  padding: 1rem;
+}
+.users-connected ul {
+  width: 100%;
+  height: auto;
+  padding: 0;
+}
+
+.users-connected li {
+  width: inherit;
+  height: auto;
+  list-style-type: none;
+  border-bottom: 2px solid rgb(235, 235, 235);
+  padding: 1rem 0.5rem;
+}
+
+.users-connected li:first-child {
+  border-top: 2px solid rgb(235, 235, 235);
+}
 /* ********* Utilities ********* */
 .align-self-right {
   align-self: end;

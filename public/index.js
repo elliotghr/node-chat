@@ -13,16 +13,26 @@ function getRandomColor() {
   return colorAleatorio;
 }
 
-const username = localStorage.getItem("username");
-if (!username) {
-  const username = prompt("Escribe tu username");
-  localStorage.setItem("username", username);
-  localStorage.setItem("color", getRandomColor());
+async function setUsernameAndColor() {
+  let username = localStorage.getItem("username");
+  let color = localStorage.getItem("color");
+
+  if (!username || !color) {
+    username = prompt("Escribe tu username");
+    color = getRandomColor();
+    localStorage.setItem("username", username);
+    localStorage.setItem("color", color);
+  }
+  return { username, color };
 }
+
+const { username, color } = await setUsernameAndColor();
 
 const socket = io({
   auth: {
     username,
+    color,
+    serverOffset: 0,
   },
 });
 const $input = document.querySelector("input");
@@ -51,7 +61,9 @@ socket.on("count-users", (count, users) => {
   $usersList.insertAdjacentHTML("beforeend", item);
 });
 
-socket.on("chat-message", (message, id, username, color) => {
+socket.on("chat-message", (message, id, username, lastId, color) => {
+  socket.auth.serverOffset = lastId;
+
   const itemMessage = `
       <li class="${
         username === localStorage.getItem("username") ? "align-self-right" : ""
@@ -74,6 +86,7 @@ document.addEventListener("submit", (e) => {
       $input.value,
       socket.id,
       localStorage.getItem("username"),
+      socket.auth.serverOffset,
       localStorage.getItem("color")
     );
     $input.value = "";
