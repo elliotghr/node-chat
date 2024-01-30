@@ -23,11 +23,12 @@ const io = new Server(httpServer, {
 });
 
 const db = createClient(config);
-await db.execute(`CREATE TABLE IF NOT EXISTS messages2(
+await db.execute(`CREATE TABLE IF NOT EXISTS messages3(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   content TEXT,
   user TEXT,
-  color VARCHAR(10)
+  color VARCHAR(10),
+  room TEXT
   )`);
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -35,50 +36,66 @@ app.set("views", path.join(__dirname, "views")); // Definimos la carpeta de las 
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "views/index.html"));
+  res.sendFile(join(__dirname, "views/form.html"));
 });
 
-async function listUsers() {
+async function listUsers(room) {
   let userList = [];
-  // Obtenemos las instancias de los sockets
-  const sockets = await io.fetchSockets();
 
-  sockets.forEach((connectedSocket) => {
-    // Acceder al objeto handshake de cada socket
-    const handshake = connectedSocket.handshake;
+  // Obtenemos los sockets conectados a la room dada
+  let fetchSockets = await io.in(room).fetchSockets();
 
-    // Accedemos a campos específicos del handshake
-    let username = handshake.auth.username;
-
+  // Por cada socket obtendremos su id y su username para enviarlo al conteo de los usuarios online
+  fetchSockets.forEach((fetchSocket) => {
     let user = {
-      id: connectedSocket.id,
-      username,
+      id: fetchSocket.id,
+      username: fetchSocket.handshake.auth.username,
     };
 
     userList = [...userList, user];
   });
 
-  io.emit("count-users", io.engine.clientsCount, userList);
+  // Enviamos el número de usuarios y el nombre de cada uno a la room dada
+  io.to(room).emit("count-users", userList.length, userList);
 }
 
 io.on("connection", async (socket) => {
-  listUsers();
+  socket.on("join", (paramsObject) => {
+    // Ingreamos al usuario a la room especificada
+    socket.join(paramsObject.room);
+    // Obtenemos la lista de usuarios
+    listUsers(paramsObject.room);
+  });
 
   socket.on("disconnect", (reason) => {
-    listUsers();
+    // Actualizamos la lista de usuarios en dicha room
+    listUsers(socket.handshake.auth.room);
   });
 
   socket.on(
     "chat-message",
-    async (message, id, username, serverOffset, color) => {
+    async (message, id, username, serverOffset, color, callback) => {
       try {
+        // Insertamos el mensaje en la DB
         const insert = await db.execute({
-          sql: "INSERT INTO messages2 (content, user, color) VALUES ($message, $username, $color)",
-          args: { message, username, color },
+          sql: "INSERT INTO messages3 (content, user, color, room) VALUES ($message, $username, $color, $room)",
+          args: { message, username, color, room: socket.handshake.auth.room },
         });
 
         const lastId = parseInt(insert.lastInsertRowid);
-        io.emit("chat-message", message, id, username, lastId, color);
+
+        // Enviamos un callback de éxito
+        callback("Message insert ✔");
+        
+        // Emitimos el mensaje a toda la room
+        io.to(socket.handshake.auth.room).emit(
+          "chat-message",
+          message,
+          id,
+          username,
+          lastId,
+          color
+        );
       } catch (error) {
         console.log(error);
         return;
@@ -86,13 +103,19 @@ io.on("connection", async (socket) => {
     }
   );
 
+  // Si tenemos una conexión nueva...
   if (!socket.recovered) {
     try {
-      const messages = await db.execute({
-        sql: "SELECT * FROM messages2 WHERE id > ?",
-        args: [socket.handshake.auth.serverOffset],
+      // Obtenemos los datos en la DB
+      const { rows } = await db.execute({
+        sql: "SELECT * FROM messages3 WHERE id > $id AND room = $room",
+        args: {
+          id: socket.handshake.auth.serverOffset,
+          room: socket.handshake.auth.room,
+        },
       });
-      messages.rows.forEach((row) => {
+      // Emitimos cada uno de los mensajes
+      rows.forEach((row) => {
         socket.emit(
           "chat-message",
           row.content,
