@@ -76,7 +76,7 @@ p {
   display: flex;
 }
 .messages-content {
-  width: 70%;
+  width: 80%;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -134,7 +134,7 @@ p {
 /* users-connected */
 
 .users-connected {
-  width: 30%;
+  width: 20%;
   height: auto;
   padding: 1rem;
 }
@@ -191,6 +191,18 @@ p {
   align-self: flex-end;
 }
 
+/* messages header */
+.messages-header {
+  width: 100%;
+  height: auto;
+  background-color: #172a3a;
+  color: white;
+
+}
+
+.messages-header p {
+  padding-left: 1rem;
+}
 /* ********* Utilities ********* */
 .align-self-right {
   align-self: end;

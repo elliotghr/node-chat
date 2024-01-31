@@ -61,9 +61,60 @@ const $input = document.querySelector("input");
 const $usersCount = document.querySelector(".users-connected p");
 const $usersList = document.querySelector(".users-connected ul");
 
+document.addEventListener("DOMContentLoaded", (e) => {
+  // Renderizamos el nombre de la room
+  document.querySelector(".messages-header p").textContent = paramsObject.room;
+});
+
+document.addEventListener("submit", (e) => {
+  e.preventDefault();
+  // Validamos que el mensaje no se vaya en blanco
+  if ($input.value) {
+    // Emitimos los datos del mensaje
+    socket.emit(
+      "chat-message",
+      $input.value,
+      socket.id,
+      localStorage.getItem("username"),
+      socket.auth.serverOffset,
+      localStorage.getItem("color"),
+      true,
+      (response) => {
+        console.log("client: ", response);
+      }
+    );
+    // Limpiamos el input
+    $input.value = "";
+  }
+});
+
 socket.on("connect", () => {
   // Al conectar el socket ingresamos al cliente a la room dada
   socket.emit("join", paramsObject);
+  // Emitimos el mensaje del admin (no se guarda en DB)
+  socket.emit(
+    "admin-message",
+    `${username} ha ingresado al chat`,
+    "Admin",
+    "#1B1B1D"
+  );
+  // Renderizamos el mensaje
+  socket.on("admin-message", (message, username, color) => {
+    // Generamos la estructura del mensaje nuevo
+    const itemMessage = `
+      <li>
+      <small style="color: ${color}">${username}</small>
+      <p>${message}</p>
+      </li>
+      `;
+    // Insertamos el mensaje en el DOM
+    document
+      .querySelector(".messages-content ul")
+      .insertAdjacentHTML("beforeend", itemMessage);
+
+    // Generamos el scroll
+    scrollBottom();
+  });
 });
 
 socket.on("count-users", (count, users) => {
@@ -107,25 +158,4 @@ socket.on("chat-message", (message, id, username, lastId, color) => {
 
   // Generamos el scroll
   scrollBottom();
-});
-
-document.addEventListener("submit", (e) => {
-  e.preventDefault();
-  // Validamos que el mensaje no se vaya en blancos
-  if ($input.value) {
-    // Emitimos los datos del mensaje
-    socket.emit(
-      "chat-message",
-      $input.value,
-      socket.id,
-      localStorage.getItem("username"),
-      socket.auth.serverOffset,
-      localStorage.getItem("color"),
-      (response) => {
-        console.log("client: ", response);
-      }
-    );
-    // Limpiamos el input
-    $input.value = "";
-  }
 });

@@ -74,19 +74,20 @@ io.on("connection", async (socket) => {
 
   socket.on(
     "chat-message",
-    async (message, id, username, serverOffset, color, callback) => {
+    async (message, id, username, serverOffset, color) => {
       try {
         // Insertamos el mensaje en la DB
         const insert = await db.execute({
           sql: "INSERT INTO messages3 (content, user, color, room) VALUES ($message, $username, $color, $room)",
-          args: { message, username, color, room: socket.handshake.auth.room },
+          args: {
+            message,
+            username,
+            color,
+            room: socket.handshake.auth.room,
+          },
         });
 
         const lastId = parseInt(insert.lastInsertRowid);
-
-        // Enviamos un callback de éxito
-        callback("Message insert ✔");
-        
         // Emitimos el mensaje a toda la room
         io.to(socket.handshake.auth.room).emit(
           "chat-message",
@@ -101,6 +102,13 @@ io.on("connection", async (socket) => {
         return;
       }
     }
+  );
+
+  // Recibimos el mensaje y lo emitimos a todos los usuarios de la room menos al emisor
+  socket.on("admin-message", async (message, username, color) =>
+    socket
+      .to(socket.handshake.auth.room)
+      .emit("admin-message", message, username, color)
   );
 
   // Si tenemos una conexión nueva...
