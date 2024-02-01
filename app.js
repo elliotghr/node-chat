@@ -59,12 +59,28 @@ async function listUsers(room) {
   io.to(room).emit("count-users", userList.length, userList);
 }
 
+// Middleweare para asignar la propiedad username y room al socket
+io.use((socket, next) => {
+  socket.username = socket.handshake.auth.username;
+  socket.room = socket.handshake.auth.room;
+  next();
+});
+
 io.on("connection", async (socket) => {
-  socket.on("join", (paramsObject) => {
+  socket.on("join", () => {
     // Ingreamos al usuario a la room especificada
-    socket.join(paramsObject.room);
+    socket.join(socket.room);
     // Obtenemos la lista de usuarios
-    listUsers(paramsObject.room);
+    listUsers(socket.room);
+
+    socket
+      .to(socket.room)
+      .emit(
+        "admin-message",
+        `${socket.username} ha ingresado al chat`,
+        "Admin",
+        "#1B1B1D"
+      );
   });
 
   socket.on("disconnect", (reason) => {
@@ -102,13 +118,6 @@ io.on("connection", async (socket) => {
         return;
       }
     }
-  );
-
-  // Recibimos el mensaje y lo emitimos a todos los usuarios de la room menos al emisor
-  socket.on("admin-message", async (message, username, color) =>
-    socket
-      .to(socket.handshake.auth.room)
-      .emit("admin-message", message, username, color)
   );
 
   // Si tenemos una conexión nueva...

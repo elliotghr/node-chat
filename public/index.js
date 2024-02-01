@@ -57,7 +57,7 @@ const socket = io({
     room: paramsObject.room,
   },
 });
-const $input = document.querySelector("input");
+const $input = document.querySelector("textarea");
 const $usersCount = document.querySelector(".users-connected p");
 const $usersList = document.querySelector(".users-connected ul");
 
@@ -88,16 +88,15 @@ document.addEventListener("submit", (e) => {
   }
 });
 
+document.querySelector("textarea").addEventListener("keyup", (e) => {
+  e.target.style.height = "2rem"; // Restablecemos la altura a '2rem'
+  e.target.style.height = e.target.scrollHeight + "px"; // Establecer la altura según el contenido
+  // Los maximos y minimos en el css nos ayudan a definir los limites
+});
+
 socket.on("connect", () => {
   // Al conectar el socket ingresamos al cliente a la room dada
-  socket.emit("join", paramsObject);
-  // Emitimos el mensaje del admin (no se guarda en DB)
-  socket.emit(
-    "admin-message",
-    `${username} ha ingresado al chat`,
-    "Admin",
-    "#1B1B1D"
-  );
+  socket.emit("join");
   // Renderizamos el mensaje
   socket.on("admin-message", (message, username, color) => {
     // Generamos la estructura del mensaje nuevo
