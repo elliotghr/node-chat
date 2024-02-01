@@ -158,3 +158,7 @@ socket.on("chat-message", (message, id, username, lastId, color) => {
   // Generamos el scroll
   scrollBottom();
 });
+
+socket.on("disconnect", () => {
+  console.log(this.user);
+});
