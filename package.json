@@ -12,13 +12,13 @@
   "author": "Elliot César Gandarilla Pérez",
   "license": "MIT",
   "dependencies": {
-    "@libsql/client": "0.4.2",
+    "@libsql/client": "^0.4.2",
     "cors": "^2.8.5",
     "dotenv": "16.4.1",
     "express": "4.18.2",
+    "morgan": "^1.10.0",
     "socket.io": "^4.7.4",
-    "uuid": "^9.0.1",
-    "morgan": "^1.10.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
