@@ -127,6 +127,7 @@ p {
   overflow-x: scroll;
   margin-left: auto;
   margin-right: auto;
+  border-radius: 1rem;
 }
 .chat-container {
   width: 100%;
@@ -165,7 +166,7 @@ p {
 .users-connected {
   width: 30%;
   min-width: 250px;
-  height: 90vh;
+  height: 100%;
   padding: 1rem;
   border: 2px solid rgb(219, 219, 219);
   overflow-y: scroll;

@@ -66,6 +66,12 @@ document.addEventListener("DOMContentLoaded", (e) => {
   document.querySelector(".messages-header p").textContent = paramsObject.room;
 });
 
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    document.querySelector("input[type=submit]").click();
+  }
+});
+
 document.addEventListener("submit", (e) => {
   e.preventDefault();
   // Validamos que el mensaje no se vaya en blanco
@@ -159,6 +165,4 @@ socket.on("chat-message", (message, id, username, lastId, color) => {
   scrollBottom();
 });
 
-socket.on("disconnect", () => {
-  console.log(this.user);
-});
+socket.on("disconnect", () => {});
