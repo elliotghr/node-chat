@@ -84,7 +84,6 @@ document.addEventListener("submit", (e) => {
       localStorage.getItem("username"),
       socket.auth.serverOffset,
       localStorage.getItem("color"),
-      true,
       (response) => {
         console.log("client: ", response);
       }
@@ -134,6 +133,7 @@ socket.on("count-users", (count, users) => {
         <li>
           <small>${user.username}</small>
         </li>
+        <hr/>
         `;
   });
   // Limpiamos el listado
@@ -143,17 +143,24 @@ socket.on("count-users", (count, users) => {
   $usersList.insertAdjacentHTML("beforeend", item);
 });
 
-socket.on("chat-message", (message, id, username, lastId, color) => {
+socket.on("chat-message", (message, id, username, lastId, color, date) => {
   // Actualizamos el serverOffset
   socket.auth.serverOffset = lastId;
+  let time = new Date(parseInt(date)).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   // Generamos la estructura del mensaje nuevo
   const itemMessage = `
       <li class="${
         username === localStorage.getItem("username") ? "align-self-right" : ""
       }">
-      <small style="color: ${color}">${username}</small>
-      <p>${message}</p>
+        <small style="color: ${color}">${username}</small>
+        <div class="message-container">
+          <p>${message}</p>
+          <small>${time ?? ""}</small>
+        </div>
       </li>
       `;
   // Insertamos el mensaje en el DOM

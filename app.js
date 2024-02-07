@@ -23,12 +23,13 @@ const io = new Server(httpServer, {
 });
 
 const db = createClient(config);
-await db.execute(`CREATE TABLE IF NOT EXISTS messages3(
+await db.execute(`CREATE TABLE IF NOT EXISTS messages5(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   content TEXT,
   user TEXT,
   color VARCHAR(10),
-  room TEXT
+  room TEXT,
+  date VARCHAR(50)
   )`);
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -92,9 +93,10 @@ io.on("connection", async (socket) => {
     "chat-message",
     async (message, id, username, serverOffset, color) => {
       try {
+        let date = new Date().getTime();
         // Insertamos el mensaje en la DB
         const insert = await db.execute({
-          sql: "INSERT INTO messages3 (content, user, color, room) VALUES ($message, $username, $color, $room)",
+          sql: `INSERT INTO messages5 (content, user, color, room, date) VALUES ($message, $username, $color, $room, ${date})`,
           args: {
             message,
             username,
@@ -111,7 +113,8 @@ io.on("connection", async (socket) => {
           id,
           username,
           lastId,
-          color
+          color,
+          date
         );
       } catch (error) {
         console.log(error);
@@ -125,7 +128,7 @@ io.on("connection", async (socket) => {
     try {
       // Obtenemos los datos en la DB
       const { rows } = await db.execute({
-        sql: "SELECT * FROM messages3 WHERE id > $id AND room = $room",
+        sql: "SELECT * FROM messages5 WHERE id > $id AND room = $room",
         args: {
           id: socket.handshake.auth.serverOffset,
           room: socket.handshake.auth.room,
@@ -138,8 +141,9 @@ io.on("connection", async (socket) => {
           row.content,
           row.id,
           row.user,
-          socket.handshake.auth.color,
-          row.color
+          socket.handshake.auth.serverOffset,
+          row.color,
+          row.date,
         );
       });
     } catch (error) {
