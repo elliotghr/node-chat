@@ -46,6 +46,27 @@ const scrollBottom = () => {
   });
 };
 
+function submit(e) {
+  e.preventDefault();
+  // Validamos que el mensaje no se vaya en blanco
+  if ($input.value) {
+    // Emitimos los datos del mensaje
+    socket.emit(
+      "chat-message",
+      $input.value,
+      socket.id,
+      localStorage.getItem("username"),
+      socket.auth.serverOffset,
+      localStorage.getItem("color"),
+      (response) => {
+        console.log("client: ", response);
+      }
+    );
+    // Limpiamos el input
+    $input.value = "";
+  }
+}
+
 const paramsObject = getURLParamsObject();
 const { username, color } = await setUsernameAndColor(paramsObject.username);
 
@@ -67,31 +88,13 @@ document.addEventListener("DOMContentLoaded", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    document.querySelector("input[type=submit]").click();
+  if (e.key === "Enter" && e.shiftKey) {
+  } else if (e.key === "Enter") {
+    submit(e);
   }
 });
 
-document.addEventListener("submit", (e) => {
-  e.preventDefault();
-  // Validamos que el mensaje no se vaya en blanco
-  if ($input.value) {
-    // Emitimos los datos del mensaje
-    socket.emit(
-      "chat-message",
-      $input.value,
-      socket.id,
-      localStorage.getItem("username"),
-      socket.auth.serverOffset,
-      localStorage.getItem("color"),
-      (response) => {
-        console.log("client: ", response);
-      }
-    );
-    // Limpiamos el input
-    $input.value = "";
-  }
-});
+document.addEventListener("submit", (e) => submit(e));
 
 document.querySelector("textarea").addEventListener("keyup", (e) => {
   e.target.style.height = "2rem"; // Restablecemos la altura a '2rem'
